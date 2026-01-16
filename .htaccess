@@ -1,0 +1,110 @@
+# IONOS Apache configuration for React SPA
+# Place this file in your public_html or www directory
+
+# MIME Types - MUST be first to ensure proper file type detection
+<IfModule mod_mime.c>
+  # JavaScript - including JSX and module files
+  AddType application/javascript js
+  AddType application/javascript jsx
+  AddType application/javascript mjs
+  AddType application/json json
+  
+  # CSS
+  AddType text/css css
+  
+  # Fonts
+  AddType font/woff woff
+  AddType font/woff2 woff2
+  AddType application/vnd.ms-fontobject eot
+  AddType font/ttf ttf
+  AddType font/otf otf
+  
+  # Images
+  AddType image/svg+xml svg svgz
+  AddType image/webp webp
+  AddType image/jpeg jpg jpeg
+  AddType image/png png
+  AddType image/gif gif
+  AddType image/x-icon ico
+  
+  # Source maps
+  AddType application/json map
+</IfModule>
+
+# Enable Rewrite Engine
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # CRITICAL: Don't rewrite if file exists
+  # Don't rewrite if directory exists
+  # Don't rewrite assets folder
+  # Don't rewrite actual file extensions
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d [OR]
+  RewriteCond %{REQUEST_URI} ^/assets/ [OR]
+  RewriteCond %{REQUEST_URI} ^/src/ [OR]
+  RewriteCond %{REQUEST_URI} \.(css|js|jsx|mjs|jpg|jpeg|png|gif|svg|woff|woff2|ttf|eot|ico|json|map)$ [NC]
+  RewriteRule . - [L]
+
+  # Only rewrite to index.html if none of the above conditions are met
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !^/index\.html$
+  RewriteRule ^(.*)$ /index.html [L]
+</IfModule>
+
+# Enable Compression (gzip)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# Browser Caching
+<IfModule mod_expires.c>
+  ExpiresActive On
+  
+  # Images
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  
+  # CSS and JavaScript
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType text/javascript "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  
+  # Fonts
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  
+  # HTML
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+# Security Headers (minimal to avoid MIME conflicts)
+<IfModule mod_headers.c>
+  Header set X-Frame-Options "SAMEORIGIN"
+  # Removed X-Content-Type-Options to prevent MIME blocking
+</IfModule>
+
+# Disable directory browsing
+Options -Indexes
+
+# Ensure file access
+<FilesMatch "\.(html|css|js|jsx|mjs|json|jpg|jpeg|png|gif|svg|woff|woff2|ttf|eot|ico|map)$">
+  Order allow,deny
+  Allow from all
+</FilesMatch>
+
+# Explicitly block access to source files in production
+<IfModule mod_rewrite.c>
+  RewriteCond %{REQUEST_URI} ^/src/
+  RewriteRule ^src/.*$ - [F,L]
+</IfModule>
