@@ -104,7 +104,20 @@ Options -Indexes
 </FilesMatch>
 
 # Explicitly block access to source files in production
+# This prevents serving development files (/src/main.jsx, etc.)
 <IfModule mod_rewrite.c>
+  # Block all requests to /src/ directory
   RewriteCond %{REQUEST_URI} ^/src/
   RewriteRule ^src/.*$ - [F,L]
+  
+  # Block requests to main.jsx specifically (development file)
+  RewriteCond %{REQUEST_URI} main\.jsx$ [NC]
+  RewriteRule . - [F,L]
 </IfModule>
+
+# Deny direct access to source files
+<FilesMatch "^(main\.jsx|App\.jsx|.*\.jsx)$">
+  <If "%{REQUEST_URI} =~ m#^/src/#">
+    Require all denied
+  </If>
+</FilesMatch>

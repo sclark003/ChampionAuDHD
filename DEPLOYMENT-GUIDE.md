@@ -220,10 +220,14 @@ This creates the `dist/` folder with your production website.
 1. Navigate to local `dist/` folder
 2. Navigate to remote website root (e.g., `/httpdocs/`)
 3. **Select all files** in `dist/` folder:
-   - `index.html`
+   - `index.html` ⚠️ **IMPORTANT:** Must be from `dist/` folder, NOT the root `index.html`!
    - `assets/` folder
    - All image files
 4. **Upload** to remote server
+
+**⚠️ CRITICAL:** Make sure you upload `dist/index.html`, NOT the root `index.html` file!
+- ✅ **Correct:** `dist/index.html` (has `/assets/index-xxxxx.js`)
+- ❌ **Wrong:** Root `index.html` (has `/src/main.jsx` - this causes MIME type errors!)
 
 **Step 5: Upload Server Files** (if needed)
 1. Upload `server.js` to your server (if using Node.js hosting)
@@ -320,6 +324,23 @@ This creates the `dist/` folder with your production website.
    - Make sure it's uploaded
    - Verify it's in the root folder
 4. **Wait a few minutes** - Sometimes changes take time to propagate
+
+---
+
+### Problem: "Loading module from /src/main.jsx was blocked because of a disallowed MIME type"
+
+**This means the WRONG index.html is being served!**
+
+**Solutions:**
+1. **Delete the root `index.html` from your server** (if it exists in `/httpdocs/`)
+2. **Upload the correct `index.html` from `dist/` folder:**
+   - The correct `index.html` should reference `/assets/index-xxxxx.js`
+   - The wrong one references `/src/main.jsx`
+3. **Verify you uploaded from `dist/` folder:**
+   - Check that `index.html` on server has `<script src="/assets/index-xxxxx.js">`
+   - NOT `<script src="/src/main.jsx">`
+4. **Clear browser cache** and hard refresh (`Ctrl + Shift + R`)
+5. **Make sure `.htaccess` is uploaded** - it blocks access to `/src/` folder
 
 ---
 
